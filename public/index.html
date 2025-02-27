@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SplitEase - Group Expense Tracker</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.3);
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --info-color: #3b82f6;
+      --dark-bg: #0a0a0a;
+      --darker-bg: #050505;
+      --card-bg: #121212;
+      --card-header: #181818;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --border-color: #2a2a2a;
+      --accent-purple: #8b5cf6;
+      --accent-blue: #3b82f6;
+      --accent-teal: #14b8a6;
+      --glow-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #181818;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+    
+    /* Card Styling */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--glow-shadow);
+    }
+    
+    .card-header {
+      background-color: var(--card-header);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      padding: 16px 20px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* Form Controls */
+    .form-control, .form-select {
+      background-color: #1a1a1a;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 12px;
+      padding: 12px 15px;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: #222;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      color: var(--text-primary);
+    }
+    
+    .input-group-text {
+      background-color: #1a1a1a;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 12px 0 0 12px;
+    }
+    
+    .form-check-input {
+      background-color: #1a1a1a;
+      border: 1px solid var(--border-color);
+    }
+    
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .form-text {
+      color: var(--text-secondary);
+    }
+    
+    /* Button Styling */
+    .btn {
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(45deg);
+      transition: all 0.3s ease;
+      opacity: 0;
+    }
+    
+    .btn:hover::after {
+      opacity: 1;
+      transform: rotate(45deg) translate(50%, 50%);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+      border-width: 2px;
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-outline-danger {
+      color: var(--danger-color);
+      border-color: var(--danger-color);
+      border-width: 2px;
+    }
+    
+    .btn-outline-danger:hover {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-outline-secondary {
+      color: var(--text-secondary);
+      border-color: #444;
+      border-width: 2px;
+    }
+    
+    .btn-outline-secondary:hover {
+      background-color: #444;
+      border-color: #444;
+      color: var(--text-primary);
+    }
+    
+    /* Badge Styling */
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.4em 0.8em;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    
+    .bg-success {
+      background-color: var(--success-color) !important;
+    }
+    
+    /* Table Styling */
+    .table {
+      color: var(--text-primary);
+      border-collapse: separate;
+      border-spacing: 0 5px;
+    }
+    
+    .table thead th {
+      background-color: var(--card-header);
+      border: none;
+      color: var(--text-primary);
+      padding: 14px;
+      font-weight: 600;
+    }
+    
+    .table tbody td {
+      background-color: #1a1a1a;
+      border: none;
+      padding: 14px;
+      vertical-align: middle;
+    }
+    
+    .table tbody tr {
+      transition: all 0.2s ease;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .table tbody tr:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .table tbody tr td:first-child {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+    
+    .table tbody tr td:last-child {
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    
+    /* Alert Styling */
+    .alert {
+      border-radius: 12px;
+      border: none;
+      padding: 16px;
+      border-left: 4px solid transparent;
+    }
+    
+    .alert-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left-color: var(--info-color);
+      color: #93c5fd;
+    }
+    
+    .alert-light {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-left-color: #444;
+      color: var(--text-secondary);
+    }
+    
+    /* List Group Styling */
+    .list-group-item {
+      background-color: #1a1a1a;
+      border-color: var(--border-color);
+      color: var(--text-primary);
+      border-radius: 8px !important;
+      margin-bottom: 5px;
+      transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+      background-color: #222;
+    }
+    
+    /* Modal Styling */
+    .modal-content {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 20px;
+    }
+    
+    .modal-footer {
+      border-top: 1px solid var(--border-color);
+      padding: 16px 20px;
+    }
+    
+    .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    
+    /* Custom Styling */
+    .app-header {
+      padding: 60px 0 40px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .app-logo {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .app-logo::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      filter: blur(25px);
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-purple));
+      opacity: 0.3;
+      z-index: -1;
+    }
+    
+    .app-tagline {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+    
+    .feature-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Glassmorphism effect */
+    .glass-card {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Animated gradient background */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, #0f0f0f, var(--darker-bg));
+      overflow: hidden;
+    }
+    
+    .gradient-bg::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.1), transparent 30%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.1), transparent 30%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05), transparent 60%);
+      opacity: 0.7;
+    }
+    
+    /* Floating particles */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      transform-origin: center center;
+    }
+    
+    /* Floating action button */
+    .floating-action-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-purple));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .floating-action-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6);
+    }
+    
+    /* Expense card */
+    .expense-card {
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    
+    /* Notification badge */
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: var(--danger-color);
+      color: white;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Progress bar */
+    .progress {
+      height: 10px;
+      background-color: #1a1a1a;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-purple));
+      transition: width 0.5s ease;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Tooltip styling */
+    .custom-tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .custom-tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .custom-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+      100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+    }
+    
+    .glow-pulse {
+      animation: glowPulse 3s infinite;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 30px 0;
+      }
+      
+      .app-logo {
+        font-size: 2.5rem;
+      }
+      
+      .card {
+        margin-bottom: 16px;
+      }
+      
+      .floating-action-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        bottom: 20px;
+        right: 20px;
+      }
+      
+      .btn {
+        padding: 10px 16px;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .vh-md-100 {
+        height: 100vh;
+      }
+    }
+    
+    /* Budget card styling */
+    .budget-card {
+      background: linear-gradient(135deg, #171717, #0a0a0a);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    
+    .budget-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    
+    .budget-amount {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    .budget-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .budget-stats-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .budget-stats-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .budget-stats-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .text-success {
+      color: var(--success-color) !important;
+    }
+    
+    .text-danger {
+      color: var(--danger-color) !important;
+    }
+    
+    /* Settlement card styling */
+    .settlement-item {
+      background-color: #1a1a1a;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      padding: 16px;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .settlement-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .settlement-item.you-owe {
+      border-left-color: var(--danger-color);
+    }
+    
+    .settlement-item.you-are-owed {
+      border-left-color: var(--success-color);
+    }
+    
+    /* Alerts container styling */
+    #alerts-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      max-width: 350px;
+    }
+    
+    .custom-alert {
+      background-color: var(--card-bg);
+      border-left: 4px solid var(--primary-color);
+      color: var(--text-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      animation: slideIn 0.3s ease forwards;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Center the initial options screen */
+    .center-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 200px);
+    }
+    
+    /* Welcome card enhancement */
+    .welcome-card {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(22, 22, 22, 0.8), rgba(14, 14, 14, 0.8));
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transform: translateY(0);
+      transition: all 0.5s ease;
+    }
+    
+    .welcome-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    }
+  </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container py-4">
+      <header class="app-header mb-5">
+        <h1 class="app-logo">SplitEase</h1>
+        <p class="app-tagline">Track and split expenses with your group</p>
+      </header>
+  
+      <div id="alerts-container"></div>
+  
+      <!-- Initial Options -->
+      <div id="initial-options" class="center-screen fade-in">
+        <div class="welcome-card">
+          <div class="text-center p-4">
+            <div class="mb-4">
+              <i class="fas fa-wallet feature-icon"></i>
+            </div>
+            <h2 class="mb-4">Welcome to SplitEase</h2>
+            <p class="card-text mb-4">Create a new group or join an existing one to start tracking expenses.</p>
+            <div class="d-grid gap-3">
+              <button class="btn btn-primary btn-lg glow-pulse" onclick="showCreateGroupForm()">
+                <i class="fas fa-plus-circle me-2"></i>Create a New Group
+              </button>
+              <button class="btn btn-outline-primary btn-lg" onclick="showJoinGroupForm()">
+                <i class="fas fa-sign-in-alt me-2"></i>Join Existing Group
+              </button>
+              <button id="resume-session-btn" class="btn btn-success btn-lg" onclick="resumeSession()" style="display: none;">
+                <i class="fas fa-history me-2"></i>Resume Previous Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Create Group Form -->
+      <div id="create-group-form" class="center-screen fade-in" style="display: none;">
+        <div class="col-md-8 col-lg-6">
+          <div class="card welcome-card">
+            <div class="card-header d-flex align-items-center">
+              <i class="fas fa-users-cog me-2"></i>Create a New Group
+            </div>
+            <div class="card-body">
+              <form onsubmit="createGroup(); return false;">
+                <div class="mb-3">
+                  <label for="createGroupName" class="form-label">Group Name</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+                    <input type="text" class="form-control" id="createGroupName" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="createGroupPassword" class="form-label">Group Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="createGroupPassword" required>
+                  </div>
+                  <div class="form-text">Share this password with people you want to invite to your group.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="creatorName" class="form-label">Your Name</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="creatorName" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="createGroupBudget" class="form-label">Group Budget (Optional)</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                    <input type="number" class="form-control" id="createGroupBudget" min="0" step="0.01">
+                  </div>
+                  <div class="form-text">Set a budget to track group spending (can be updated later).</div>
+                </div>
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check-circle me-2"></i>Create Group
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="showInitialOptions()">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Join Group Form -->
+      <div id="join-group-form" class="center-screen fade-in" style="display: none;">
+        <div class="col-md-8 col-lg-6">
+          <div class="card welcome-card">
+            <div class="card-header d-flex align-items-center">
+              <i class="fas fa-sign-in-alt me-2"></i>Join Existing Group
+            </div>
+            <div class="card-body">
+              <form onsubmit="joinGroup(); return false;">
+                <div class="mb-3">
+                  <label for="joinGroupName" class="form-label">Group Name</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+                    <input type="text" class="form-control" id="joinGroupName" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="joinGroupPassword" class="form-label">Group Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="joinGroupPassword" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="userName" class="form-label">Your Name</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="userName" required>
+                  </div>
+                </div>
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Join Group
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="showInitialOptions()">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Group Dashboard -->
+      <div id="group-dashboard" class="fade-in" style="display: none;">
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div id="group-name-display">
+                <h2 class="mb-0"><i class="fas fa-users me-2"></i>Group: <span></span></h2>
+              </div>
+              <div class="d-flex align-items-center">
+                <div class="me-3 position-relative">
+                  <span id="user-name-display" class="fw-bold"></span>
+                  <span id="user-role-badge" class="badge bg-primary ms-1">Member</span>
+                </div>
+                <button class="btn btn-outline-danger" onclick="logout()">
+                  <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="row">
+          <!-- Left Column -->
+          <div class="col-lg-8">
+            <!-- Budget Display -->
+            <div id="budget-display" class="mb-4"></div>
+  
+            <!-- Creator Message -->
+            <div id="creator-message" class="alert alert-info mb-4" style="display: none;">
+              <h5><i class="fas fa-crown me-2"></i>Group Creator Dashboard</h5>
+              <p>As the creator, you can add expenses, edit or delete existing expenses, and manage the group budget.</p>
+            </div>
+  
+            <!-- Member Message -->
+            <div id="member-message" class="alert alert-light mb-4" style="display: none;">
+              <h5><i class="fas fa-user me-2"></i>Group Member Dashboard</h5>
+              <p>You can view expenses and settlements. Contact the group creator to add new expenses.</p>
+            </div>
+  
+            <!-- Add Expense Form (Creator Only) -->
+            <div id="expense-form" class="card mb-4" style="display: none;">
+              <div class="card-header d-flex align-items-center">
+                <i class="fas fa-plus-circle me-2"></i>Add New Expense
+              </div>
+              <div class="card-body">
+                <form onsubmit="addExpense(); return false;">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="expenseDescription" class="form-label">Description</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                        <input type="text" class="form-control" id="expenseDescription" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="expenseAmount" class="form-label">Amount</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                        <input type="number" class="form-control" id="expenseAmount" min="0.01" step="0.01" required>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="expensePayer" class="form-label">Paid By</label>
+                      <select class="form-select" id="expensePayer" required></select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="splitType" class="form-label">Split Type</label>
+                      <select class="form-select" id="splitType">
+                        <option value="equal">Equal Split</option>
+                        <option value="percentage">Percentage Split</option>
+                        <option value="fixed">Fixed Amount Split</option>
+                        <option value="shares">Shares Split</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Split Among</label>
+                    <div id="split-among-checkboxes" class="d-flex flex-wrap gap-3"></div>
+                  </div>
+  
+                  <!-- Equal Split Section -->
+                  <div id="equal-split-section" class="mb-3">
+                    <div class="alert alert-light">
+                      <small><i class="fas fa-info-circle me-2"></i>The expense will be split equally among all selected members.</small>
+                    </div>
+                  </div>
+  
+                  <!-- Percentage Split Section -->
+                  <div id="percentage-split-section" class="mb-3" style="display: none;">
+                    <label class="form-label">Percentage Split (must total 100%)</label>
+                    <div id="percentage-split-inputs"></div>
+                  </div>
+  
+                  <!-- Fixed Split Section -->
+                  <div id="fixed-split-section" class="mb-3" style="display: none;">
+                    <label class="form-label">Fixed Amount Split (must total expense amount)</label>
+                    <div id="fixed-split-inputs"></div>
+                  </div>
+  
+                  <!-- Shares Split Section -->
+                  <div id="shares-split-section" class="mb-3" style="display: none;">
+                    <label class="form-label">Shares Split (expense divided proportionally)</label>
+                    <div id="shares-split-inputs"></div>
+                  </div>
+  
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-plus-circle me-2"></i>Add Expense
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+  
+            <!-- Expenses List -->
+            <div class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-receipt me-2"></i>Expenses</span>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-secondary" onclick="exportCSV()">
+                    <i class="fas fa-file-csv me-1"></i>Export CSV
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="exportPDF()">
+                    <i class="fas fa-file-pdf me-1"></i>Export PDF
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="no-expenses-message" class="alert alert-light text-center" style="display: none;">
+                  <i class="fas fa-info-circle me-2"></i>No expenses added yet.
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Paid By</th>
+                        <th>Split Among</th>
+                        <th>Split Type</th>
+                        <th>Date</th>
+                        <th id="actions-header" style="display: none;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="expense-list"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Right Column -->
+          <div class="col-lg-4">
+            <!-- Budget Settings (Creator Only) -->
+            <div id="budget-settings" class="card mb-4" style="display: none;">
+              <div class="card-header d-flex align-items-center">
+                <i class="fas fa-chart-pie me-2"></i>Budget Settings
+              </div>
+              <div class="card-body">
+                <button class="btn btn-outline-primary w-100" onclick="showBudgetModal()">
+                  <i class="fas fa-edit me-2"></i>Update Budget
+                </button>
+              </div>
+            </div>
+  
+            <!-- Settlements -->
+            <div class="card mb-4">
+              <div class="card-header d-flex align-items-center">
+                <i class="fas fa-exchange-alt me-2"></i>Settlements
+              </div>
+              <div class="card-body">
+                <div id="settlement-summary" class="mb-3 p-3 glass-card rounded">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fas fa-balance-scale me-2"></i>Your Balance:</span>
+                    <span id="user-balance" class="fw-bold">$0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="fas fa-arrow-up me-2"></i>You Owe:</span>
+                    <span id="user-owes">$0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span><i class="fas fa-arrow-down me-2"></i>You're Owed:</span>
+                    <span id="user-owed">$0.00</span>
+                  </div>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="show-only-my-settlements" onchange="filterSettlements()">
+                  <label class="form-check-label" for="show-only-my-settlements">
+                    Show only my settlements
+                  </label>
+                </div>
+                <div id="no-settlements-message" class="alert alert-light text-center" style="display: none;">
+                  <i class="fas fa-info-circle me-2"></i>No settlements to show.
+                </div>
+                <ul id="settlement-list" class="list-group"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Budget Modal -->
+      <div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="budgetModalLabel"><i class="fas fa-chart-pie me-2"></i>Update Group Budget</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="budget-form">
+                <div class="mb-3">
+                  <label for="groupBudget" class="form-label">Group Budget</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                    <input type="number" class="form-control" id="groupBudget" min="0" step="0.01" required>
+                  </div>
+                  <div class="form-text">Set to 0 to disable budget tracking.</div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-2"></i>Cancel
+              </button>
+              <button type="button" class="btn btn-primary" onclick="updateBudget()">
+                <i class="fas fa-save me-2"></i>Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Floating Action Button (for mobile) -->
+      <div id="mobile-add-expense-btn" class="floating-action-btn" style="display: none;" onclick="showExpenseForm()">
+        <i class="fas fa-plus"></i>
+      </div>
+    </div>
+  
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- App Script -->
+    <script src="script.js"></script>
+    <script>
+      // Additional JavaScript for enhanced UI features
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if user is on mobile
+        function isMobile() {
+          return window.innerWidth < 768;
+        }
+        
+        // Show/hide floating action button based on screen size and user role
+        function updateMobileUI() {
+          const expenseForm = document.getElementById('expense-form');
+          const mobileAddBtn = document.getElementById('mobile-add-expense-btn');
+          
+          if (isMobile() && expenseForm && expenseForm.style.display !== 'none') {
+            mobileAddBtn.style.display = 'flex';
+          } else {
+            mobileAddBtn.style.display = 'none';
+          }
+        }
+        
+        // Function to show expense form (for mobile FAB)
+        window.showExpenseForm = function() {
+          const expenseForm = document.getElementById('expense-form');
+          if (expenseForm) {
+            expenseForm.scrollIntoView({ behavior: 'smooth' });
+          }
+        };
+        
+        // Update UI on resize
+        window.addEventListener('resize', updateMobileUI);
+        
+        // Initial check
+        updateMobileUI();
+        
+        // Create floating particles effect
+        function createParticles() {
+          const particles = document.getElementById('particles');
+          const particleCount = 30;
+          
+          for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 6px
+            const size = Math.random() * 4 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Random animation duration between 20s and 40s
+            const duration = Math.random() * 20 + 20;
+            particle.style.animation = `floatParticle ${duration}s linear infinite`;
+            
+            // Random delay
+            particle.style.animationDelay = `${Math.random() * 10}s`;
+            
+            particles.appendChild(particle);
+          }
+        }
+        
+        // Add floating particles
+        createParticles();
+        
+        // Add fade-in animation to elements as they appear
+        const animateElements = document.querySelectorAll('.card, .alert');
+        animateElements.forEach((element, index) => {
+          setTimeout(() => {
+            element.classList.add('fade-in');
+          }, index * 100);
+        });
+        
+        // Check for previous session
+        const checkPreviousSession = function() {
+          if (localStorage.getItem('smartExpense_session')) {
+            document.getElementById('resume-session-btn').style.display = 'block';
+          }
+        };
+        
+        // Run session check
+        checkPreviousSession();
+      });
+      
+      // Add keyframe animation for floating particles
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        @keyframes floatParticle {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(10px, 10px) rotate(90deg);
+          }
+          50% {
+            transform: translate(0, 20px) rotate(180deg);
+          }
+          75% {
+            transform: translate(-10px, 10px) rotate(270deg);
+          }
+          100% {
+            transform: translate(0, 0) rotate(360deg);
+          }
+        }
+      `;
+      document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>
+  
