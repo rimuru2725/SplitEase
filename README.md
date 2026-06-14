@@ -1,84 +1,90 @@
-# SplitEase
+# SplitEase 💳
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/wallet.svg" width="80" height="80" alt="SplitEase Logo">
-  <h2>Smart Group Expense Tracker</h2>
-  <p><em>Split expenses, track balances, and manage group finances with ease</em></p>
+  <h2>Smart Group Expense Tracker & Financial Ledger</h2>
+  <p><em>Split expenses, analyze visual dashboards, track budgets, and manage group finances securely.</em></p>
   
-  [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-  [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+  [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
   [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-  [![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+  [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
   
   [Overview](#-overview) • 
-  [Features](#-features) • 
-  [Screenshots](#-screenshots) • 
+  [Architecture & Hardening](#-architecture--hardening) • 
+  [Key Features](#-key-features) • 
+  [Tech Stack](#-tech-stack) • 
   [Installation](#-setup--installation) • 
-  [Roadmap](#-roadmap) • 
-  [Contributing](#-contributing)
+  [API Endpoints](#-api-endpoints)
 </div>
+
+---
 
 ## 🌟 Overview
 
-**SplitEase** is a hassle-free group expense tracker designed to simplify shared finances. Whether you're roommates splitting rent, friends on vacation, or colleagues managing office expenses, SplitEase provides an intuitive platform to:
+**SplitEase** is a modern, premium web application designed to simplify shared finances for roommates, friends on vacation, or team events. It removes spreadsheets and awkward money conversations by providing:
 
-- Track who paid what and who owes whom
-- Split expenses using various methods
-- Visualize spending patterns
-- Settle debts efficiently
+1. **Stunning Glassmorphism Frontend**: Features interactive charts, 3D tilt effects, spring micro-animations, and animated counters.
+2. **Hardened Security & Database**: Protected by IP rate limiters, atomic transactions, automatic foreign key cascades, Zod validations, and strict data consistency checks.
 
-No more spreadsheets, mental calculations, or awkward money conversations!
+---
 
-## ✨ Features
+## 🛡️ Architecture & Hardening
 
-| Feature | Description |
-|---------|-------------|
-| 📊 **Smart Expense Splitting** | Split bills equally, by percentage, fixed amounts, or shares |
-| 👥 **Group Management** | Create multiple groups for different expense categories or social circles |
-| 🏦 **Budget Tracking** | Set group budgets and receive notifications when approaching limits |
-| 📱 **Responsive Design** | Access from any device with a fully responsive interface |
-| 📅 **Transaction History** | View complete expense history with filtering and search capabilities |
-| 🔄 **Real-time Updates** | Instant synchronization when expenses are added or modified |
-| 📊 **Balance Summary** | At-a-glance view of who owes what to whom |
-| 💳 **Payment Integration** | *(Planned)* Settle debts directly through the app with Razorpay |
+SplitEase is built with production-grade backend design patterns:
+
+### 1. Robust Middleware wrappers
+All API route handlers leverage unified decorators for security, reliability, and structured error formatting:
+*   `apiHandler`: Catches global exceptions and formats unified JSON responses with standard HTTP status codes.
+*   `withAuth`: Extracts and decodes the JWT session token, passing the authenticated session details.
+*   `withRateLimit`: Protects endpoints from abuse using sliding-window rate limiters.
+
+### 2. Database Performance & Atomicity
+*   **Write-Ahead Logging (WAL)**: Enabled in SQLite to allow multiple threads to read concurrently while write actions compile, reducing lock contentions.
+*   **Indices**: Custom database indexes are configured on performance-critical columns (`group_id`, `created_at`).
+*   **Transactions**: Multi-statement inserts and updates are executed inside database transactions ensuring zero partial states on validation failure.
+
+### 3. Rate Limiting Throttling
+We implemented a zero-dependency in-memory sliding window rate limiter (with LRU eviction to prevent memory leaks):
+*   `auth`: 5 requests per 60 seconds per IP.
+*   `write`: 30 requests per 60 seconds per IP.
+*   `read`: 60 requests per 60 seconds per IP.
+
+---
+
+## ✨ Key Features
+
+| Feature | Details |
+|---|---|
+| 📈 **Custom Splits** | Split expenses equally, by percentage, fixed amount, or shares. |
+| 📊 **Spend Visualization** | Real-time charts (donut for categories, area for trends) via Recharts. |
+| 🛡️ **Budget Thresholds** | Configure custom budget limits with automated percentage alerts. |
+| 📜 **Audit Trail Log** | High-fidelity paginated activity tracker showing every edit, creation, deletion, or payment event. |
+| 🔄 **Recurring Templates** | Create weekly/monthly templates that automatically compute next-due dates. |
+| 👥 **Safe Member Leaving** | Prevents members from leaving or being removed if they have a non-zero balance to protect accounting history. |
+
+---
 
 ## 🛠️ Tech Stack
 
-<div align="center">
+*   **Frontend**: Next.js 16 (App Router), React 19, Framer Motion 12, Recharts 3, TailwindCSS 4, Lucide Icons.
+*   **Backend & Security**: Node.js, JSON Web Tokens (JWT), bcryptjs, Zod v4 (validation), sliding-window rate limiting.
+*   **Database**: SQLite (`sqlite3` / `sqlite`), WAL Mode, transactional integrity, indices, cascade foreign keys.
 
-| Layer | Technologies |
-|-------|-------------|
-| **Frontend** | HTML5, CSS3, Bootstrap 5, JavaScript (ES6+) |
-| **Backend** | Node.js, Express.js, RESTful API |
-| **Database** | SQLite (with Sequelize ORM) |
-| **Authentication** | JWT, bcrypt |
-| **Payment** | Razorpay API *(Planned)* |
-| **Deployment** | Docker, Nginx *(Planned)* |
-
-</div>
-
-## 🎮 Screenshots
-
-<div align="center">
-  <img src="./screenshots/welcome.png" width="700" style="border-radius: 10px; margin-bottom: 10px">
-  <p><em>Create or Join a group</em></p>
-  
-  <img src="./screenshots/home.png" width="700" style="border-radius: 10px; margin-bottom: 10px">
-  <p><em>Dashboard - Overview of group expenses and balances</em></p>
-</div>
+---
 
 ## 🚀 Setup & Installation
 
 ### Prerequisites
-- Node.js (v14.x or higher)
-- npm (v6.x or higher)
+*   Node.js (v18.x or higher)
+*   npm (v9.x or higher)
 
 ### Installation Steps
 
 1️⃣ **Clone the repository**
 ```bash
 git clone https://github.com/rimuru2725/SplitEase.git
-cd SplitEase
+cd SplitEase/splitease
 ```
 
 2️⃣ **Install dependencies**
@@ -86,92 +92,60 @@ cd SplitEase
 npm install
 ```
 
-3️⃣ **Configure environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4️⃣ **Initialize the database**
-```bash
-npm run init-db
-```
-
-5️⃣ **Start the development server**
+3️⃣ **Run the development server**
 ```bash
 npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-6️⃣ **Access the application**
-Open your browser and navigate to `http://localhost:3000`
-
-### Docker Deployment (Coming Soon)
+4️⃣ **Verify compilation**
 ```bash
-docker-compose up -d
+npm run build
 ```
 
-## 📊 API Documentation
+---
 
-SplitEase provides a RESTful API for all operations. Documentation is available at `/api/docs` when running the server.
+## 📊 API Endpoints
 
-Key endpoints include:
+All endpoints are validated using Zod, rate-limited, and require JWT authentication via the `Authorization: Bearer <token>` header (or `?token=<token>` query parameter for file exports).
 
-- `GET /api/groups` - List all groups
-- `POST /api/expenses` - Create a new expense
-- `GET /api/users/:id/balance` - Get balance summary for a user
+### Auth Endpoints
+*   `POST /api/auth/create-group` — Create group, add creator, set default alerts (75% / 90%), return JWT session.
+*   `POST /api/auth/join-group` — Verify password, add member, return JWT session.
 
-## 📱 Mobile App
+### Expenses
+*   `GET /api/expenses` — List group expenses (newest first).
+*   `POST /api/expenses` — Create a new expense (validated against splits & budget alerts).
+*   `PUT /api/expenses/[id]` — Edit a group expense (creator or payer only).
+*   `DELETE /api/expenses/[id]` — Delete an expense (creator or payer only).
 
-A React Native mobile application is currently in development to complement the web interface, providing on-the-go expense tracking.
+### Settlements & Payments
+*   `GET /api/settlements` — Calculate optimized settlements and user balances.
+*   `POST /api/settlements/pay` — Create payments, confirm receipts, or reject/cancel pending payments.
 
-## 🔮 Roadmap
+### Group Management
+*   `GET /api/group/info` — Fetch group budget statistics and alert thresholds.
+*   `PUT /api/group/budget` — Update budget setting and set custom threshold percentages (creator only).
+*   `POST /api/group/members` — Remove a group member or self-removal (requires zero balance check).
+*   `POST /api/group/delete` — Delete group and cascade delete all child transactions (creator only, requires password check).
 
-<div align="center">
+### Recurring Expenses
+*   `GET /api/recurring` — List active/inactive recurring expense templates.
+*   `POST /api/recurring` — Create a recurring template.
+*   `PUT /api/recurring/[id]` — Edit template active state/fields.
+*   `DELETE /api/recurring/[id]` — Delete template.
 
-| Feature | Status | Expected |
-|---------|--------|----------|
-| 📱 **Mobile Application** | In Design | Q3 2023 |
-| 💰 **Expense Analytics** | In Progress | Q2 2023 |
-| 💳 **Razorpay Integration** | Under Development | Q2 2023 |
-| 🌐 **Multi-currency Support** | Planned | Q4 2023 |
-| 🔔 **Push Notifications** | Planned | Q3 2023 |
-| 📊 **Advanced Reports** | Planned | Q4 2023 |
-| 🔄 **Recurring Expenses** | Planned | Q1 2024 |
-
-</div>
-
-## 🤝 Contributing
-
-We welcome contributions from the community! To contribute:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📧 Contact & Support
-
-- **Website:** [Click Me](https://github.com/rimuru2725/SplitEase.git)
-- **Email:** [Click Me](mailto:vikysharma644@gmail.com)
-
-For bug reports and feature requests, please use the [GitHub Issues](https://github.com/rimuru2725/SplitEase/issues).
+### Other Endpoints
+*   `GET /api/users` — Fetch users in the group.
+*   `GET /api/activity` — Paginated audit log/activity stream.
+*   `GET /api/export/csv` — Export all expenses to CSV spreadsheet.
 
 ---
 
 <div align="center">
-  <p>
-    <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/heart.svg" width="20" height="20" alt="Heart" style="vertical-align: middle;">
-    <b>Built with passion by VIVEK</b>
-  </p>
+  <p><b>Built by VIVEK</b></p>
   <p>
     <a href="https://github.com/rimuru2725">GitHub</a> •
-    <a href="https://www.linkedin.com/in/vivek-sharma-06219a28b/">LinkedIn</a> •
+    <a href="https://www.linkedin.com/in/vivek-sharma-06219a28b/">LinkedIn</a>
   </p>
 </div>
