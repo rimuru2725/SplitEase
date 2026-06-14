@@ -73,6 +73,37 @@ We implemented a zero-dependency in-memory sliding window rate limiter (with LRU
 
 ---
 
+## 🎮 Screenshots & Visual Demos
+
+<div align="center">
+  <h3>1️⃣ Interactive Dashboard & Spatial Analytics</h3>
+  <p>Track group balances, categorize expenses dynamically with Recharts, and review the recent activity feed.</p>
+  <img src="./screenshots/home.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Dashboard">
+
+  <h3>2️⃣ Create or Join Group (3D Glassmorphism Interface)</h3>
+  <p>Dynamic 3D-tilt interaction, animated ambient floating gradient orbs, and clean setup wizard.</p>
+  <img src="./screenshots/welcome.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Landing & Auth">
+
+  <h3>3️⃣ Staggered Expense Log & Settlement Tracking</h3>
+  <p>Browse individual ledger entries with spring reveals, view optimized payment paths, and settle balances instantly.</p>
+  <img src="./screenshots/expenses.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Expense Log">
+  <img src="./screenshots/settlements.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Settlements">
+
+  <h3>4️⃣ Custom Budget Alerts & Admin Controls</h3>
+  <p>Configure custom budget ceilings and add percentage alert triggers to control spending limits.</p>
+  <img src="./screenshots/settings.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Budget settings">
+
+  <h3>5️⃣ Spring Action Add-Expense Drawer</h3>
+  <p>Physics-based scale adjustments for quick, custom splitting among members.</p>
+  <img src="./screenshots/add_expense.png" width="750" style="border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);" alt="SplitEase Add Expense Drawer">
+
+  <h3>🎥 Full UI Flow Walkthrough</h3>
+  <p>Floating orbs, number counters counting from 0 to target, and page tabs switching smoothly.</p>
+  <img src="./screenshots/ui_flow.webp" width="750" style="border-radius: 10px; margin-bottom: 25px;" alt="SplitEase UI Recording">
+</div>
+
+---
+
 ## 🚀 Setup & Installation
 
 ### Prerequisites
