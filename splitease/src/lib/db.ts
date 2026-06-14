@@ -1,26 +1,108 @@
-import sqlite3 from "sqlite3";
-import { open, Database } from "sqlite";
+import { createClient } from "@libsql/client";
 import path from "path";
 
-let dbInstance: Database | null = null;
+// ═══════════════════════════════════════════════════════════════
+// Database Wrapper Interface & Implementation
+// ═══════════════════════════════════════════════════════════════
 
-export async function getDb(): Promise<Database> {
+export interface DatabaseWrapper {
+  all(sql: string, params?: any[]): Promise<any[]>;
+  get(sql: string, params?: any[]): Promise<any>;
+  run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
+  exec(sql: string): Promise<void>;
+}
+
+class LibsqlDatabaseWrapper implements DatabaseWrapper {
+  constructor(private executor: any) {}
+
+  getExecutor() {
+    return this.executor;
+  }
+
+  async all(sql: string, params: any[] = []): Promise<any[]> {
+    const res = await this.executor.execute({ sql, args: params });
+    return res.rows.map((row: any) => {
+      const plain: any = {};
+      for (const key of Object.keys(row)) {
+        plain[key] = row[key];
+      }
+      return plain;
+    });
+  }
+
+  async get(sql: string, params: any[] = []): Promise<any> {
+    const res = await this.executor.execute({ sql, args: params });
+    const row = res.rows[0];
+    if (!row) return null;
+    const plain: any = {};
+    for (const key of Object.keys(row)) {
+      plain[key] = row[key];
+    }
+    return plain;
+  }
+
+  async run(sql: string, params: any[] = []): Promise<{ lastID?: number; changes?: number }> {
+    const res = await this.executor.execute({ sql, args: params });
+    return {
+      lastID: res.lastInsertRowid !== undefined ? Number(res.lastInsertRowid) : undefined,
+      changes: res.rowsAffected,
+    };
+  }
+
+  async exec(sql: string): Promise<void> {
+    const statements = sql
+      .split(";")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    
+    for (const statement of statements) {
+      await this.executor.execute(statement);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Connection Initialization
+// ═══════════════════════════════════════════════════════════════
+
+let dbInstance: DatabaseWrapper | null = null;
+let clientInstance: any = null;
+
+export async function getDb(): Promise<DatabaseWrapper> {
   if (dbInstance) {
     return dbInstance;
   }
 
-  // Next.js runtime process.cwd() is the 'splitease' folder
-  const dbPath = path.resolve(process.cwd(), "../expenses.db");
+  const databaseUrl = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
 
-  dbInstance = await open({
-    filename: dbPath,
-    driver: sqlite3.verbose().Database,
+  let url = "";
+  if (databaseUrl) {
+    url = databaseUrl;
+  } else {
+    // Next.js runtime process.cwd() is the 'splitease' folder
+    const dbPath = path.resolve(process.cwd(), "../expenses.db");
+    url = `file:${dbPath}`;
+  }
+
+  clientInstance = createClient({
+    url,
+    authToken: authToken || undefined,
   });
 
-  // ─── Performance & Safety PRAGMAs ────────────────────────────
-  await dbInstance.run("PRAGMA journal_mode = WAL;");
-  await dbInstance.run("PRAGMA foreign_keys = ON;");
-  await dbInstance.run("PRAGMA busy_timeout = 5000;");
+  dbInstance = new LibsqlDatabaseWrapper(clientInstance);
+
+  // ─── Performance & Safety PRAGMAs (Local only) ────────────────
+  const isRemote = url.startsWith("libsql://") || url.startsWith("https://") || url.startsWith("http://");
+  if (!isRemote) {
+    try {
+      await clientInstance.execute("PRAGMA journal_mode = WAL;");
+      await clientInstance.execute("PRAGMA foreign_keys = ON;");
+      await clientInstance.execute("PRAGMA busy_timeout = 5000;");
+    } catch (e) {
+      console.warn("Failed to set SQLite PRAGMAs locally:", e);
+    }
+  }
 
   // ─── Core Tables ─────────────────────────────────────────────
   await dbInstance.exec(`
@@ -76,7 +158,6 @@ export async function getDb(): Promise<Database> {
   `);
 
   // ─── New Tables ──────────────────────────────────────────────
-
   await dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS activity_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,7 +191,6 @@ export async function getDb(): Promise<Database> {
   `);
 
   // ─── Performance Indexes ─────────────────────────────────────
-
   await dbInstance.exec(`
     CREATE INDEX IF NOT EXISTS idx_expenses_group_id ON expenses(group_id);
     CREATE INDEX IF NOT EXISTS idx_expenses_created_at ON expenses(created_at);
@@ -122,13 +202,6 @@ export async function getDb(): Promise<Database> {
     CREATE INDEX IF NOT EXISTS idx_recurring_expenses_group_id ON recurring_expenses(group_id);
   `);
 
-  // ─── Legacy Migration (safe no-op if column exists) ──────────
-  try {
-    await dbInstance.run("ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT 'Others';");
-  } catch {
-    // Column already exists, safe to ignore
-  }
-
   return dbInstance;
 }
 
@@ -136,29 +209,35 @@ export async function getDb(): Promise<Database> {
 // Transaction Helper
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Execute multiple database operations within a single transaction.
- * Automatically rolls back on error.
- *
- * @example
- * ```ts
- * await runTransaction(db, async (db) => {
- *   await db.run("INSERT INTO groups ...");
- *   await db.run("INSERT INTO users ...");
- * });
- * ```
- */
 export async function runTransaction<T>(
-  db: Database,
-  fn: (db: Database) => Promise<T>
+  db: DatabaseWrapper,
+  fn: (txDb: DatabaseWrapper) => Promise<T>
 ): Promise<T> {
-  await db.run("BEGIN TRANSACTION;");
-  try {
-    const result = await fn(db);
-    await db.run("COMMIT;");
-    return result;
-  } catch (error) {
-    await db.run("ROLLBACK;");
-    throw error;
+  // Check if underlying executor has transaction capability (i.e. clientInstance)
+  if (db instanceof LibsqlDatabaseWrapper) {
+    const executor = db.getExecutor();
+    // If it's already a transaction, just run the function nested
+    if (executor && 'commit' in executor && 'rollback' in executor) {
+      return fn(db);
+    }
+    
+    // Start a transaction on the client
+    if (clientInstance) {
+      const tx = await clientInstance.transaction("write");
+      const txWrapper = new LibsqlDatabaseWrapper(tx);
+      try {
+        const result = await fn(txWrapper);
+        await tx.commit();
+        return result;
+      } catch (error) {
+        await tx.rollback();
+        throw error;
+      } finally {
+        tx.close();
+      }
+    }
   }
+
+  // Fallback if transaction cannot be initialized
+  return fn(db);
 }

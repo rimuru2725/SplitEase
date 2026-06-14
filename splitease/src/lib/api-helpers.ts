@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuth, type UserSession } from "./auth";
 import { AppError, AuthenticationError, RateLimitError } from "./errors";
 import { checkRateLimit, getClientIp, type RATE_LIMITS } from "./rate-limit";
-import type { Database } from "sqlite";
+import type { DatabaseWrapper } from "./db";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -128,7 +128,7 @@ export type EntityType = "expense" | "settlement" | "budget" | "member" | "group
  * Non-blocking — errors are caught and logged but don't fail the request.
  */
 export async function logActivity(
-  db: Database,
+  db: DatabaseWrapper,
   groupId: number,
   userName: string,
   action: ActivityAction,
